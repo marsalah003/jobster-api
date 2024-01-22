@@ -14,11 +14,16 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 require("express-async-errors");
 const dotenv_1 = __importDefault(require("dotenv"));
+require("yamljs");
 // extra security packages
 const helmet_1 = __importDefault(require("helmet"));
 const cors_1 = __importDefault(require("cors"));
-const xss = require("xss-clean");
+// import xss from "xss-clean";
 const express_rate_limit_1 = require("express-rate-limit");
+// Swagger
+const swagger_ui_express_1 = __importDefault(require("swagger-ui-express"));
+const yamljs_1 = __importDefault(require("yamljs"));
+const swaggerDocument = yamljs_1.default.load("./swagger.yaml");
 const express_1 = __importDefault(require("express"));
 const not_found_1 = require("./middleware/not-found");
 const error_handler_1 = require("./middleware/error-handler");
@@ -29,6 +34,7 @@ const authentication_1 = require("./middleware/authentication");
 dotenv_1.default.config();
 const app = (0, express_1.default)();
 //security middlware
+app.set("trust proxy", 1);
 const limiter = (0, express_rate_limit_1.rateLimit)({
     windowMs: 15 * 60 * 1000, // 15 minutes
     limit: 100, // Limit each IP to 100 requests per `window` (here, per 15 minutes).
@@ -40,10 +46,11 @@ app.use(limiter);
 app.use(express_1.default.json());
 app.use((0, helmet_1.default)());
 app.use((0, cors_1.default)());
-app.use(xss());
+// app.use(xss());
 app.get("/", (req, res) => {
-    res.send("jobs api");
+    res.send('<h1> Jobs API </h1> <a href="/api-docs"> Documentation </a> "');
 });
+app.use("/api-docs", swagger_ui_express_1.default.serve, swagger_ui_express_1.default.setup(swaggerDocument));
 //auth routes
 app.use("/api/v1/auth", auth_1.router);
 // jobs routes
@@ -51,7 +58,7 @@ app.use("/api/v1/jobs", authentication_1.authHandler, jobs_1.router);
 //error handlers
 app.use(error_handler_1.errorHandlerMiddleware);
 app.use(not_found_1.notFound);
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 5000;
 //starting server and db
 (() => __awaiter(void 0, void 0, void 0, function* () {
     yield (0, connect_1.connectDB)(process.env.MONGO_URI).catch((err) => console.log(err));

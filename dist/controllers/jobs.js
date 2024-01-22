@@ -31,10 +31,11 @@ const getSingleJob = ({ params: { id: jobId }, user: { userId } }, res) => __awa
     res.status(http_status_codes_1.StatusCodes.OK).json({ job });
 });
 exports.getSingleJob = getSingleJob;
-const updateJob = ({ body: { company, position }, user: { userId }, params: { id: jobId }, }, res) => __awaiter(void 0, void 0, void 0, function* () {
+const updateJob = ({ body, user: { userId }, params: { id: jobId } }, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { company, position } = body;
     if (!company || !position)
         throw new errors_1.BadRequestError("both company AND position must be provided");
-    const updatedJob = yield Job_1.Job.findOneAndUpdate({ _id: jobId, createdBy: userId }, { company, position }, {
+    const updatedJob = yield Job_1.Job.findOneAndUpdate({ _id: jobId, createdBy: userId }, Object.assign({}, body), {
         new: true,
         runValidators: true,
     });

@@ -1,11 +1,18 @@
-import { Request, Response } from "express";
+import { Response } from "express";
 import { BadRequestError, UnauthenticatedError } from "../errors";
 import { User } from "../models/User";
 
 import { StatusCodes } from "http-status-codes";
 
+interface registerBodyI {
+  name: string;
+  password: string;
+  email: number;
+}
+interface loginBodyI extends Omit<registerBodyI, "name"> {}
+
 const register = async (
-  { body: { name, password, email } }: Request,
+  { body: { name, password, email } }: { body: registerBodyI },
   res: Response
 ) => {
   const user = await User.create({ name, password, email });
@@ -15,7 +22,10 @@ const register = async (
   res.status(StatusCodes.CREATED).json({ token, user: { name: user.name } });
 };
 
-const login = async ({ body: { email, password } }: Request, res: Response) => {
+const login = async (
+  { body: { email, password } }: { body: loginBodyI },
+  res: Response
+) => {
   if (!email || !password)
     throw new BadRequestError("both email and password must be provided");
 

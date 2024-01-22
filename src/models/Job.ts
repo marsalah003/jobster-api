@@ -1,5 +1,4 @@
 import { Model, Schema, model, Types } from "mongoose";
-import { User } from "./User";
 
 interface IJob {
   company: string;

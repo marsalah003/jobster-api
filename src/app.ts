@@ -1,11 +1,17 @@
 import "express-async-errors";
 import dotenv from "dotenv";
 import { Request, Response } from "express";
+import "yamljs";
 // extra security packages
 import helmet from "helmet";
 import cors from "cors";
 // import xss from "xss-clean";
 import { rateLimit } from "express-rate-limit";
+
+// Swagger
+import swaggerUI from "swagger-ui-express";
+import YAML from "yamljs";
+const swaggerDocument = YAML.load("./swagger.yaml");
 
 import express from "express";
 import { notFound as notFoundMiddleware } from "./middleware/not-found";
@@ -33,8 +39,9 @@ app.use(cors());
 // app.use(xss());
 
 app.get("/", (req: Request, res: Response) => {
-  res.send("jobs api");
+  res.send('<h1> Jobs API </h1> <a href="/api-docs"> Documentation </a> "');
 });
+app.use("/api-docs", swaggerUI.serve, swaggerUI.setup(swaggerDocument));
 
 //auth routes
 app.use("/api/v1/auth", authRouter);
@@ -46,7 +53,7 @@ app.use("/api/v1/jobs", authHandler, jobsRouter);
 app.use(errorHandlerMiddleware);
 app.use(notFoundMiddleware);
 
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 5000;
 
 //starting server and db
 (async () => {
