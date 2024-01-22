@@ -4,7 +4,7 @@ import { Request, Response } from "express";
 // extra security packages
 import helmet from "helmet";
 import cors from "cors";
-const xss = require("xss-clean");
+import xss from "xss-clean";
 import { rateLimit } from "express-rate-limit";
 
 import express from "express";
@@ -18,7 +18,7 @@ dotenv.config();
 const app = express();
 
 //security middlware
-app.use("trust proxy", 1);
+app.set("trust proxy", 1);
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   limit: 100, // Limit each IP to 100 requests per `window` (here, per 15 minutes).
