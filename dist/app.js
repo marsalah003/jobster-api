@@ -17,7 +17,7 @@ const dotenv_1 = __importDefault(require("dotenv"));
 // extra security packages
 const helmet_1 = __importDefault(require("helmet"));
 const cors_1 = __importDefault(require("cors"));
-// import xss from "xss-clean";
+const xss = require("xss-clean");
 const express_rate_limit_1 = require("express-rate-limit");
 const express_1 = __importDefault(require("express"));
 const not_found_1 = require("./middleware/not-found");
@@ -40,7 +40,7 @@ app.use(limiter);
 app.use(express_1.default.json());
 app.use((0, helmet_1.default)());
 app.use((0, cors_1.default)());
-// app.use(xss());
+app.use(xss());
 app.get("/", (req, res) => {
     res.send("jobs api");
 });

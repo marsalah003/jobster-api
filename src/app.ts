@@ -4,7 +4,7 @@ import { Request, Response } from "express";
 // extra security packages
 import helmet from "helmet";
 import cors from "cors";
-// import xss from "xss-clean";
+const xss = require("xss-clean");
 import { rateLimit } from "express-rate-limit";
 
 import express from "express";
@@ -18,6 +18,7 @@ dotenv.config();
 const app = express();
 
 //security middlware
+app.use("trust proxy", 1);
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   limit: 100, // Limit each IP to 100 requests per `window` (here, per 15 minutes).
@@ -29,7 +30,7 @@ app.use(limiter);
 app.use(express.json());
 app.use(helmet());
 app.use(cors());
-// app.use(xss());
+app.use(xss());
 
 app.get("/", (req: Request, res: Response) => {
   res.send("jobs api");
