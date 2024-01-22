@@ -1,6 +1,9 @@
 import { StatusCodes } from "http-status-codes";
 import { ErrorRequestHandler } from "express";
 
+interface errorObject {
+  message: string;
+}
 const errorHandlerMiddleware: ErrorRequestHandler = (err, req, res, next) => {
   const customError = {
     StatusCode: err.statusCode || StatusCodes.INTERNAL_SERVER_ERROR,
@@ -11,9 +14,9 @@ const errorHandlerMiddleware: ErrorRequestHandler = (err, req, res, next) => {
     customError.StatusCode = StatusCodes.NOT_FOUND;
   }
   if (err.name === "ValidationError") {
-    customError.msg = Object.values(err.errors)
-      .map((item) => item.message)
-      .join(", ");
+    const obj: errorObject[] = Object.values(err.errors);
+
+    customError.msg = obj.map((item) => item.message).join(", ");
     customError.StatusCode = StatusCodes.BAD_REQUEST;
   }
   if (err.code && err.code === 11000) {

@@ -4,7 +4,7 @@ import { Request, Response } from "express";
 // extra security packages
 import helmet from "helmet";
 import cors from "cors";
-import xss from "xss-clean";
+// import xss from "xss-clean";
 import { rateLimit } from "express-rate-limit";
 
 import express from "express";
@@ -29,7 +29,7 @@ app.use(limiter);
 app.use(express.json());
 app.use(helmet());
 app.use(cors());
-app.use(xss());
+// app.use(xss());
 
 app.get("/", (req: Request, res: Response) => {
   res.send("jobs api");

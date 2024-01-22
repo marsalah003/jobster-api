@@ -12,9 +12,8 @@ const errorHandlerMiddleware = (err, req, res, next) => {
         customError.StatusCode = http_status_codes_1.StatusCodes.NOT_FOUND;
     }
     if (err.name === "ValidationError") {
-        customError.msg = Object.values(err.errors)
-            .map((item) => item.message)
-            .join(", ");
+        const obj = Object.values(err.errors);
+        customError.msg = obj.map((item) => item.message).join(", ");
         customError.StatusCode = http_status_codes_1.StatusCodes.BAD_REQUEST;
     }
     if (err.code && err.code === 11000) {
