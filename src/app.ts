@@ -55,7 +55,7 @@ app.get("*", (req: Request, res: Response) => {
 app.use(errorHandlerMiddleware);
 app.use(notFoundMiddleware);
 
-const port = process.env.PORT || 4999;
+const port = process.env.PORT || 5000;
 
 //starting server and db
 (async () => {

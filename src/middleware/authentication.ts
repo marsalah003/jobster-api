@@ -22,6 +22,7 @@ const authHandler = async (req: Request, res: Response, next: NextFunction) => {
     ) as decodedShape;
     const { userId, email } = decoded;
     req.user = { userId, email };
+
     next();
   } catch (error) {
     throw new UnauthenticatedError("Not authorized to access this route");

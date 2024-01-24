@@ -6,7 +6,7 @@ const testUserHandler = (
   res: Response,
   next: NextFunction
 ) => {
-  if (email === TEST_USER_EMAIL)
+  if (email === process.env.TEST_USER_EMAIL)
     throw new BadRequestError(`test user: read only!`);
 
   next();

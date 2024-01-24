@@ -56,7 +56,7 @@ app.get("*", (req, res) => {
 //error handlers
 app.use(error_handler_1.errorHandlerMiddleware);
 app.use(not_found_1.notFound);
-const port = process.env.PORT || 4999;
+const port = process.env.PORT || 5000;
 //starting server and db
 (() => __awaiter(void 0, void 0, void 0, function* () {
     yield (0, connect_1.connectDB)(process.env.MONGO_URI).catch((err) => console.log(err));

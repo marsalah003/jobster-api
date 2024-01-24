@@ -5,7 +5,6 @@ interface errorObject {
   message: string;
 }
 const errorHandlerMiddleware: ErrorRequestHandler = (err, req, res, next) => {
-  console.log(err);
   const customError = {
     StatusCode: err.statusCode || StatusCodes.INTERNAL_SERVER_ERROR,
     msg: err.message || `Something went wrong, try again later`,

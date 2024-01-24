@@ -61,7 +61,7 @@ UserSchema.pre("save", function () {
 });
 UserSchema.methods.generateToken = function () {
     const { JWT_LIFETIME, JWT_SECRET } = process.env;
-    const token = (0, jsonwebtoken_1.sign)({ userId: this._id, name: this.email }, JWT_SECRET, {
+    const token = (0, jsonwebtoken_1.sign)({ userId: this._id, email: this.email }, JWT_SECRET, {
         expiresIn: JWT_LIFETIME,
     });
     return token;
