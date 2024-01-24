@@ -7,6 +7,8 @@ interface IUser {
   name: string;
   password: string;
   email: string;
+  lastName: string;
+  location: string;
 }
 interface IUserMethods {
   generateToken: () => string;
@@ -38,14 +40,28 @@ const UserSchema = new Schema<IUser, UserModel, IUserMethods>({
     ],
     unique: true,
   },
+  lastName: {
+    type: String,
+    trim: true,
+    maxLength: 20,
+    default: "lastName",
+  },
+  location: {
+    type: String,
+    trim: true,
+    maxLength: 20,
+    default: "my city",
+  },
 });
 UserSchema.pre("save", async function () {
+  if (!this.isModified("password")) return;
   const salt = await genSalt(10);
   this.password = await hash(this.password, salt);
 });
 
 UserSchema.methods.generateToken = function () {
   const { JWT_LIFETIME, JWT_SECRET } = process.env;
+
   const token = sign(
     { userId: this._id, name: this.name },
     JWT_SECRET as string,

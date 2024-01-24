@@ -1,7 +1,6 @@
 import type { NextFunction, Request, Response } from "express";
 import { verify } from "jsonwebtoken";
 import { UnauthenticatedError } from "../errors";
-import { User } from "../models/User";
 
 type decodedShape = {
   userId: string;

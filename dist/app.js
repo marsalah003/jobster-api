@@ -17,13 +17,13 @@ const dotenv_1 = __importDefault(require("dotenv"));
 require("yamljs");
 // extra security packages
 const helmet_1 = __importDefault(require("helmet"));
-const cors_1 = __importDefault(require("cors"));
+const path_1 = require("path");
+// import cors from "cors";
 // import xss from "xss-clean";
-const express_rate_limit_1 = require("express-rate-limit");
 // Swagger
-const swagger_ui_express_1 = __importDefault(require("swagger-ui-express"));
-const yamljs_1 = __importDefault(require("yamljs"));
-const swaggerDocument = yamljs_1.default.load("./swagger.yaml");
+// import swaggerUI from "swagger-ui-express";
+// import YAML from "yamljs";
+// const swaggerDocument = YAML.load("./swagger.yaml");
 const express_1 = __importDefault(require("express"));
 const not_found_1 = require("./middleware/not-found");
 const error_handler_1 = require("./middleware/error-handler");
@@ -33,32 +33,30 @@ const jobs_1 = require("./routes/jobs");
 const authentication_1 = require("./middleware/authentication");
 dotenv_1.default.config();
 const app = (0, express_1.default)();
-//security middlware
 app.set("trust proxy", 1);
-const limiter = (0, express_rate_limit_1.rateLimit)({
-    windowMs: 15 * 60 * 1000, // 15 minutes
-    limit: 100, // Limit each IP to 100 requests per `window` (here, per 15 minutes).
-    standardHeaders: "draft-7", // draft-6: `RateLimit-*` headers; draft-7: combined `RateLimit` header
-    legacyHeaders: false, // Disable the `X-RateLimit-*` headers.
-    // store: ... , // Use an external store for consistency across multiple server instances.
-});
-app.use(limiter);
+app.use(express_1.default.static((0, path_1.resolve)(__dirname, "../src/client/build")));
 app.use(express_1.default.json());
 app.use((0, helmet_1.default)());
-app.use((0, cors_1.default)());
+// make requests to our server from any ip address
+// app.use(cors());
+// sanitise the body, query params, params etc of the requests
 // app.use(xss());
-app.get("/", (req, res) => {
-    res.send('<h1> Jobs API </h1> <a href="/api-docs"> Documentation </a> "');
-});
-app.use("/api-docs", swagger_ui_express_1.default.serve, swagger_ui_express_1.default.setup(swaggerDocument));
+// Swagger
+// app.get("/", (req: Request, res: Response) => {
+//   res.send('<h1> Jobs API </h1> <a href="/api-docs"> Documentation </a> "');
+// });
+// app.use("/api-docs", swaggerUI.serve, swaggerUI.setup(swaggerDocument));
 //auth routes
 app.use("/api/v1/auth", auth_1.router);
 // jobs routes
 app.use("/api/v1/jobs", authentication_1.authHandler, jobs_1.router);
+app.get("*", (req, res) => {
+    res.sendFile((0, path_1.resolve)(__dirname, "../src/client/build", "index.html"));
+});
 //error handlers
 app.use(error_handler_1.errorHandlerMiddleware);
 app.use(not_found_1.notFound);
-const port = process.env.PORT || 5000;
+const port = process.env.PORT || 4999;
 //starting server and db
 (() => __awaiter(void 0, void 0, void 0, function* () {
     yield (0, connect_1.connectDB)(process.env.MONGO_URI).catch((err) => console.log(err));

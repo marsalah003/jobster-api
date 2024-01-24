@@ -1,8 +1,12 @@
-import { Response } from "express";
+import { Response, Request } from "express";
+
 import { Job } from "../models/Job";
 import { StatusCodes } from "http-status-codes";
 import { BadRequestError, NotFoundError } from "../errors";
-
+import { Types } from "mongoose";
+import {} from "mongoose";
+import moment from "moment";
+import { Stats, statSync } from "fs";
 interface bodyI {
   company: string;
   position: string;
@@ -27,6 +31,76 @@ interface updateJobI extends getSingleJobI {
   body: bodyI;
 }
 interface deleteJobI extends getSingleJobI {}
+interface getAllJobsI {
+  user: { userId: string };
+  query: {
+    status: "interview" | "declined" | "pending" | "all";
+    jobType: "full-time" | "part-time" | "remote" | "internship" | "all";
+    sort: string;
+    page: string;
+    search?: string;
+  };
+}
+interface queryI {
+  status?: "interview" | "declined" | "pending" | "all";
+  jobType?: "full-time" | "part-time" | "remote" | "internship" | "all";
+  position?: { $regex: string; $options: "i" };
+}
+interface formatedStatsI {
+  pending?: number;
+  interview?: number;
+  declined?: number;
+}
+interface defaultStatsI {
+  interview?: number;
+  declined?: number;
+  pending?: number;
+}
+const addMonths = (date: Date, months: number) => {
+  date.setMonth(date.getMonth() + months);
+  return date;
+};
+
+const getStats = async ({ user: { userId } }: Request, res: Response) => {
+  const stats = await Job.aggregate([
+    { $match: { createdBy: new Types.ObjectId(userId) } },
+    { $group: { _id: "$status", count: { $sum: 1 } } },
+  ]);
+
+  const { declined, interview, pending } = stats.reduce(
+    (acc, { _id: title, count }) => ({ ...acc, [title]: count }),
+    {}
+  ) as defaultStatsI;
+
+  let monthlyApplications = await Job.aggregate([
+    { $match: { createdBy: new Types.ObjectId(userId) } },
+    {
+      $group: {
+        _id: { year: { $year: "$createdAt" }, month: { $month: "$createdAt" } },
+        count: { $sum: 1 },
+      },
+    },
+    { $sort: { "_id.year": -1, "_id.month": -1 } },
+    { $limit: 6 },
+  ]);
+  monthlyApplications = monthlyApplications
+    .map(({ _id: { year, month }, count }) => ({
+      date: moment()
+        .month(month - 1)
+        .year(year)
+        .format("MMM Y"),
+      count,
+    }))
+    .reverse();
+  res.status(StatusCodes.OK).json({
+    defaultStats: {
+      pending: pending || 0,
+      declined: declined || 0,
+      interview: interview || 0,
+    },
+    monthlyApplications,
+  });
+};
 
 const createJob = async (
   { body, user: { userId } }: createJobI,
@@ -37,18 +111,53 @@ const createJob = async (
 };
 
 const getAllJobs = async (
-  { user: { userId } }: { user: userI },
+  {
+    user: { userId },
+    query: { status, jobType, sort, page, search },
+  }: getAllJobsI,
   res: Response
 ) => {
-  console.log(userId);
-  const jobs = await Job.find({ createdBy: userId }).sort("createdAt");
-  res.status(StatusCodes.OK).json({ count: jobs.length, jobs });
+  const query: queryI = {};
+
+  if (status && status !== "all") query["status"] = status;
+  if (jobType && jobType !== "all") query["jobType"] = jobType;
+  if (search) query["position"] = { $regex: search, $options: "i" };
+
+  const defaultLimit = 10;
+
+  let sortingString: string;
+
+  switch (sort) {
+    case "oldest":
+      sortingString = "createdAt";
+      break;
+    case "a-z":
+      sortingString = "position";
+      break;
+    case "z-a":
+      sortingString = "-position";
+      break;
+    default:
+      sortingString = "-createdAt";
+  }
+  const skip = defaultLimit * (Number(page) - 1);
+
+  const jobs = await Job.find({ createdBy: userId, ...query })
+    .sort(sortingString)
+    .limit(defaultLimit)
+    .skip(skip);
+
+  const totalJobs = await Job.countDocuments({ createdBy: userId, ...query });
+
+  const numOfPages = Math.ceil(totalJobs / defaultLimit);
+  res.status(StatusCodes.OK).json({ totalJobs: totalJobs, jobs, numOfPages });
 };
 
 const getSingleJob = async (
   { params: { id: jobId }, user: { userId } }: getSingleJobI,
   res: Response
 ) => {
+  console.log("here now");
   const job = await Job.findOne({ _id: jobId, createdBy: userId });
   if (!job) throw new NotFoundError(`No job with id ${jobId}`);
 
@@ -87,7 +196,7 @@ const deleteJob = async (
 
   if (!deletedJob) throw new NotFoundError(`No job with id ${jobId}`);
 
-  res.status(StatusCodes.OK).send();
+  res.status(StatusCodes.OK).send("The job has been deleted");
 };
 
-export { createJob, getAllJobs, getSingleJob, updateJob, deleteJob };
+export { createJob, getAllJobs, getSingleJob, updateJob, deleteJob, getStats };

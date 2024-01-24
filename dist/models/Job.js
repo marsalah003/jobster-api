@@ -7,13 +7,13 @@ const jobSchema = new mongoose_1.Schema({
         type: String,
         required: [true, "please enter a name"],
         trim: true,
-        maxlength: [20, "name too long "],
+        maxlength: [60, "name too long "],
     },
     position: {
         type: String,
         required: [true, "please enter an email"],
         trim: true,
-        maxlength: [20, "email too long "],
+        maxlength: [60, "email too long "],
     },
     status: {
         type: String,
@@ -24,6 +24,16 @@ const jobSchema = new mongoose_1.Schema({
         type: mongoose_1.Schema.Types.ObjectId,
         ref: "User",
         required: [true, "A Job must have a 'CreatedBy' attribute"],
+    },
+    jobType: {
+        type: String,
+        enum: ["full-time", "part-time", "remote", "internship"],
+        default: "full-time",
+    },
+    jobLocation: {
+        type: String,
+        default: "my city",
+        required: true,
     },
 }, { timestamps: true });
 const Job = (0, mongoose_1.model)("Job", jobSchema);

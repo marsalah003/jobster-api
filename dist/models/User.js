@@ -38,9 +38,23 @@ const UserSchema = new mongoose_1.Schema({
         ],
         unique: true,
     },
+    lastName: {
+        type: String,
+        trim: true,
+        maxLength: 20,
+        default: "lastName",
+    },
+    location: {
+        type: String,
+        trim: true,
+        maxLength: 20,
+        default: "my city",
+    },
 });
 UserSchema.pre("save", function () {
     return __awaiter(this, void 0, void 0, function* () {
+        if (!this.isModified("password"))
+            return;
         const salt = yield (0, bcryptjs_1.genSalt)(10);
         this.password = yield (0, bcryptjs_1.hash)(this.password, salt);
     });
