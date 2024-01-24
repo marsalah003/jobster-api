@@ -20,8 +20,8 @@ const authHandler = (req, res, next) => __awaiter(void 0, void 0, void 0, functi
     const token = authorization === null || authorization === void 0 ? void 0 : authorization.split(" ")[1];
     try {
         const decoded = (0, jsonwebtoken_1.verify)(token, process.env.JWT_SECRET);
-        const { userId, name } = decoded;
-        req.user = { userId, name };
+        const { userId, email } = decoded;
+        req.user = { userId, email };
         next();
     }
     catch (error) {

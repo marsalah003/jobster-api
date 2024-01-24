@@ -4,7 +4,7 @@ import { UnauthenticatedError } from "../errors";
 
 type decodedShape = {
   userId: string;
-  name: string;
+  email: string;
 };
 
 const authHandler = async (req: Request, res: Response, next: NextFunction) => {
@@ -20,8 +20,8 @@ const authHandler = async (req: Request, res: Response, next: NextFunction) => {
       token,
       process.env.JWT_SECRET as string
     ) as decodedShape;
-    const { userId, name } = decoded;
-    req.user = { userId, name };
+    const { userId, email } = decoded;
+    req.user = { userId, email };
     next();
   } catch (error) {
     throw new UnauthenticatedError("Not authorized to access this route");

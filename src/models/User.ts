@@ -63,7 +63,7 @@ UserSchema.methods.generateToken = function () {
   const { JWT_LIFETIME, JWT_SECRET } = process.env;
 
   const token = sign(
-    { userId: this._id, name: this.name },
+    { userId: this._id, name: this.email },
     JWT_SECRET as string,
     {
       expiresIn: JWT_LIFETIME,

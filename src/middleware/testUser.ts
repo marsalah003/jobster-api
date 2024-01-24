@@ -1,12 +1,12 @@
 import { NextFunction, Request, Response } from "express";
 import { BadRequestError } from "../errors";
-const TEST_USER_ID = "65af57ceb6ccff677e0e4f8c";
+const TEST_USER_EMAIL = "testUser@test.com";
 const testUserHandler = (
-  { user: { userId } }: Request,
+  { user: { email } }: Request,
   res: Response,
   next: NextFunction
 ) => {
-  if (userId === TEST_USER_ID)
+  if (email === TEST_USER_EMAIL)
     throw new BadRequestError(`test user: read only!`);
 
   next();
